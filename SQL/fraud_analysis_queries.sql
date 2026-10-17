@@ -83,3 +83,17 @@ SELECT CASE WHEN Fault = 'Policy Holder' AND BasePolicy IN ('All Perils', 'Colli
        ROUND(100 * SUM(FraudFound_P) / (SELECT SUM(FraudFound_P) FROM claims), 1) AS share_of_all_fraud_pct
 FROM claims
 GROUP BY group_label;
+
+
+-- 6. Address change before claim, outside the high-risk segment
+
+--    (shows fraud concentrated in claims filed 2-3 years after an address change)
+
+SELECT AddressChange_Claim,
+       COUNT(*) AS claims,
+       SUM(FraudFound_P) AS fraud_cases,
+       ROUND(100 * AVG(FraudFound_P), 2) AS fraud_rate_pct
+FROM claims
+WHERE NOT (Fault = 'Policy Holder' AND BasePolicy IN ('All Perils', 'Collision'))
+GROUP BY AddressChange_Claim
+ORDER BY fraud_rate_pct DESC;
